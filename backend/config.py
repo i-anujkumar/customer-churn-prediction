@@ -1,2 +1,2 @@
-THRESHOLD = 0.35
-MODEL_PATH = "backend/model/churn_pipeline.pkl"
+THRESHOLD = 0.5
+MODEL_PATH = "model/churn_pipeline.pkl"

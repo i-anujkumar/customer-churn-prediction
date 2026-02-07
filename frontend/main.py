@@ -1,10 +1,19 @@
 import streamlit as st
 import requests
+import os
 
-st.set_page_config(page_title="Customer Churn Predictor", layout="centered")
+# =========================
+# BACKEND CONFIG
+# =========================
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+ENDPOINT = f"{BACKEND_URL}/predict"
+
+st.set_page_config(
+    page_title="Customer Churn Predictor",
+    layout="centered"
+)
 
 st.title("📉 Customer Churn Prediction App")
-
 st.markdown("Enter customer details to predict churn probability.")
 
 # =========================
@@ -40,11 +49,22 @@ PaymentMethod = st.selectbox(
     ]
 )
 
-MonthlyCharges = st.number_input("Monthly Charges", min_value=0.0, max_value=200.0, value=70.0)
-TotalCharges = st.number_input("Total Charges", min_value=0.0, max_value=10000.0, value=2000.0)
+MonthlyCharges = st.number_input(
+    "Monthly Charges",
+    min_value=0.0,
+    max_value=200.0,
+    value=70.0
+)
+
+TotalCharges = st.number_input(
+    "Total Charges",
+    min_value=0.0,
+    max_value=10000.0,
+    value=2000.0
+)
 
 # =========================
-# PREDICT BUTTON
+# PREDICTION
 # =========================
 
 if st.button("🔍 Predict Churn"):
@@ -71,32 +91,34 @@ if st.button("🔍 Predict Churn"):
     }
 
     try:
-        response = requests.post(
-            "http://127.0.0.1:8000/predict",
-            json=payload,
-            timeout=5
-        )
+        response = requests.post(ENDPOINT, json=payload, timeout=5)
 
         if response.status_code == 200:
-            result = response.json()
+            res = response.json()
 
-            churn_prob = result["churn_probability"]
-            churn_pred = result["churn_prediction"]
+            # ✅ CORRECT KEYS FROM BACKEND
+            prob = res.get("churn_probability", 0) * 100
+            prediction = res.get("churn_prediction", 0)
 
-            st.subheader("📊 Prediction Result")
-            st.metric("Churn Probability", f"{churn_prob * 100:.2f}%")
+            st.markdown(f"### 🔢 Churn Probability: **{prob:.2f}%**")
 
-            if churn_pred == 1:
-                st.error("⚠️ Customer is likely to churn")
+            if prediction == 1:
+                st.error("❌ The customer is likely to churn")
             else:
-                st.success("✅ Customer is likely to stay")
+                st.success("✅ The customer is likely to stay")
 
         else:
-            st.error("❌ API Error: Invalid response from backend")
+            st.error(f"Backend error: {response.status_code}")
 
     except requests.exceptions.ConnectionError:
-        st.error("🚫 FastAPI backend is not running. Please start it first.")
+        st.error("❌ Cannot connect to backend. Is FastAPI running?")
     except requests.exceptions.Timeout:
         st.error("⏱️ Backend timeout. Try again.")
     except Exception as e:
         st.error(f"Unexpected error: {e}")
+
+
+
+
+
+

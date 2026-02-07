@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
-from backend.config import THRESHOLD, MODEL_PATH
+from config import THRESHOLD, MODEL_PATH
 import pandas as pd
 
 # Load pipeline
@@ -39,7 +39,7 @@ def root():
 
 @app.post("/predict")
 def predict_churn(data: CustomerData):
-    df = pd.DataFrame([data.dict()])
+    df = pd.DataFrame([data.model_dump()])
 
     prob = pipeline.predict_proba(df)[:, 1][0]
     prediction = int(prob >= THRESHOLD)
