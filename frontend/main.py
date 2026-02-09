@@ -5,7 +5,7 @@ import os
 # =========================
 # BACKEND CONFIG
 # =========================
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+BACKEND_URL = os.getenv("https://customer-churn-backend-14rt.onrender.com/","BACKEND_URL", "http://localhost:8000")
 ENDPOINT = f"{BACKEND_URL}/predict"
 
 st.set_page_config(
